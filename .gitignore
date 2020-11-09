@@ -27,3 +27,7 @@ setup.log
 
 # Local OPAM switch
 _opam/
+
+# perso files
+Correction_cv2*
+cv2_ulm.drawio
