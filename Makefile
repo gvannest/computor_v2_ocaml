@@ -11,13 +11,15 @@
 NAME = computorv2
 NAME_TESTS = tests
 
+export OUNIT_CI=true
+
 
 ######################### BUILDING STAGES ######################
 
 .PHONY: all clean byte native sanity test
 
 OCB_FLAGS = -use-ocamlfind -I srcs -I tests
-OCB_MENHIR_FLAGS = -use-menhir #-menhir "menhir --trace" 
+OCB_MENHIR_FLAGS = -use-menhir
 OCB = ocamlbuild $(OCB_MENHIR_FLAGS) $(OCB_FLAGS)
 
 all: native #byte
@@ -33,7 +35,7 @@ byte: sanity
 
 test: sanity
 	$(OCB) $(NAME_TESTS).byte
-	./$(NAME_TESTS).byte
+	./$(NAME_TESTS).byte -ci true
 
 # check that packages can be found
 sanity:
