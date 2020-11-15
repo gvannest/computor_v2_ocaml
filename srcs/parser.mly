@@ -38,7 +38,7 @@ formula_expr:
     | f = CONST_FLOAT                           { Literal_float f }
     | LPAREN e = formula_expr RPAREN            { e }
     | i = COMPLEX                               { Literal_complex i }
-    | x = VAR                                   { Variable.get_variable x }
+    | x = VAR                                   { Var (Variable.create_var 1.0 x 1.0) }
     | e1=formula_expr PLUS e2=formula_expr      { Plus (e1, e2) }
     | e1=formula_expr MINUS e2=formula_expr     { Minus (e1, e2) }
     | e1=formula_expr TIMES e2=formula_expr     { Times (e1, e2) }

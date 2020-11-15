@@ -1,7 +1,7 @@
 type expr =
   | Literal_float of float
   | Literal_complex of Complex.t
-  | Var of string
+  (* | Var of string *)
   | Plus of expr * expr
   | Minus of expr * expr
   | Times of expr * expr
