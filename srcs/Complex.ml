@@ -28,7 +28,7 @@ module type COMPLEX = sig
 end
 
 module type MAKECOMPLEX = 
-  functor (Coefficient : COEFFICIENTS) -> COMPLEX with t_in = Coefficient.t
+  functor (Coefficient : COEFFICIENTS) -> COMPLEX with type t_in = Coefficient.t
 
 module MakeComplex : MAKECOMPLEX =
   functor (Coefficient: COEFFICIENTS) ->
@@ -91,6 +91,7 @@ module MakeComplex : MAKECOMPLEX =
 
     end
 
+module FloatParamComplex : (COEFFICIENTS with type t := Params.FloatParam.t) = MakeComplex(Params.FloatParam)
 
 
 

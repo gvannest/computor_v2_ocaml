@@ -34,10 +34,10 @@ module type PARAMETRIZED = sig
   val pow : t -> t_in -> t
 end
 
-module type MAKEPARAMETRIZED = 
-  functor (Input : COEFFPOWER) -> PARAMETRIZED with t_in = Input.t
+module type MAKEPARAMS = 
+  functor (Input : COEFFPOWER) -> PARAMETRIZED with type t_in = Input.t
 
-module MakeParametrized : MAKEPARAMETRIZED =
+module MakeParams : MAKEPARAMS =
   functor (Input: COEFFPOWER) ->
     struct
       type t_in = Input.t
@@ -96,6 +96,7 @@ module MakeParametrized : MAKEPARAMETRIZED =
 
     end
 
+module FloatParam : (COEFFPOWER with type t := float) = MakeParams(Float)
 
 
 

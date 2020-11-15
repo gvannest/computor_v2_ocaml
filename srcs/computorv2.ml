@@ -1,12 +1,10 @@
 
 
-
 let process_line (input:string) =
     let lexbuf = Lexer.set_filename "stdin" (Lexing.from_string input) in
     try
         let (parsing_output:External_types.parser_t) = Parser.parse_input Lexer.read lexbuf in match parsing_output with
             | Expr e ->
-                (* print_endline (Solver.ast_to_string e) ; *)
                 Printf.printf "%s\n" (Solver.expr_to_string (Solver.eval_expr e))
             | Equation (var, e) ->
                 Variable.set_variable var e ;
