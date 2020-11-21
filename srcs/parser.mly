@@ -4,7 +4,7 @@
 
 
 %token <float> CONST_FLOAT
-%token <Complex.t> COMPLEX
+%token <Complex.FloatParamComplex.t> COMPLEX
 %token <string> VAR
 %token PLUS MINUS TIMES DIV POWER
 %token LPAREN RPAREN
@@ -38,7 +38,7 @@ formula_expr:
     | f = CONST_FLOAT                           { Literal_float f }
     | LPAREN e = formula_expr RPAREN            { e }
     | i = COMPLEX                               { Literal_complex i }
-    | x = VAR                                   { Var (Variable.create_var 1.0 x 1.0) }
+    | x = VAR                                   { Literal_complex (Variable.get_variable x) }
     | e1=formula_expr PLUS e2=formula_expr      { Plus (e1, e2) }
     | e1=formula_expr MINUS e2=formula_expr     { Minus (e1, e2) }
     | e1=formula_expr TIMES e2=formula_expr     { Times (e1, e2) }

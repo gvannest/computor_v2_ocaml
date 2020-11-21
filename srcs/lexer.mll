@@ -34,7 +34,7 @@ rule read = parse
     | int_number            { CONST_FLOAT(float_of_string(Lexing.lexeme lexbuf)) }
     | float_number          { CONST_FLOAT(float_of_string(Lexing.lexeme lexbuf)) }
     | alpha+                { VAR(Lexing.lexeme lexbuf) }
-    | complex               { COMPLEX(Complex.i) }
+    | complex               { COMPLEX(Complex.FloatParamComplex.i) }
     | give_value            { GIVE_VALUE }
     | '='                   { EQUALS }
     | '+'                   { PLUS }

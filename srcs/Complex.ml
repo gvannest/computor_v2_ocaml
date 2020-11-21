@@ -9,11 +9,18 @@ module type COEFFICIENTS = sig
   val pow : t -> t -> t
   val to_string : t -> string
   val neg : t -> t
+  val is_nul : t -> bool
+  val is_one : t -> bool
+  val is_neg : t -> bool
+  val is_parametrized : t -> bool
+  val zero : t
+  val one : t
 end
 
 module type COMPLEX = sig
   type t_in
   type t
+  exception PowerError of string
   val create : t_in -> t_in -> t
   val neg : t -> t
   val zero : t
@@ -24,7 +31,7 @@ module type COMPLEX = sig
   val sub : t -> t -> t
   val mul : t -> t -> t
   val div : t -> t -> t
-  val pow : t -> t_in -> t
+  val pow : t -> t -> t
 end
 
 module type MAKECOMPLEX = 
@@ -45,11 +52,12 @@ module MakeComplex : MAKECOMPLEX =
       let neg c = create (Coefficient.neg c.re) (Coefficient.neg c.im)
       let is_nul c = (Coefficient.is_nul c.re && Coefficient.is_nul c.im)
       let is_one c = (Coefficient.is_one c.re && Coefficient.is_one c.im)
+      let is_complex c = not (Coefficient.is_nul c.im)
 
       let to_string complex = match (complex.re, complex.im) with
         | (a,b) when Coefficient.is_nul a && Coefficient.is_nul b -> "0"
         | (a,b) when Coefficient.is_nul a -> Printf.sprintf "%si" (Coefficient.to_string b)
-        | (a,b) Coefficient.is_nul b -> Printf.sprintf "%s" (Coefficient.to_string a)
+        | (a,b) when Coefficient.is_nul b -> Printf.sprintf "%s" (Coefficient.to_string a)
         | (a,b) when Coefficient.is_neg b -> Printf.sprintf "%s - %si" (Coefficient.to_string a) (Coefficient.to_string (Coefficient.neg b))
         | _ -> Printf.sprintf "%s + %si" (Coefficient.to_string complex.re) (Coefficient.to_string complex.im)
       
@@ -76,23 +84,19 @@ module MakeComplex : MAKECOMPLEX =
         else
           create (Coefficient.div c1.re c2.re) (Coefficient.div c1.im c2.re)
       
-      let pow (c:t) (exp:t_in) =
+      let pow (c:t) (exp:t) =
         let pair = (c, exp) in
         let rec loop_pow p = match p with
-          | (_, e) when Coefficient.is_parametrized e -> raise (PowerError "Failure in Complex.pow : power is not a float!\n")
+          | (_, e) when is_complex e || Coefficient.is_parametrized e.re -> raise (PowerError "Failure in Complex.pow : power is not a float!\n")
           | (v, _) when is_nul v -> zero
-          | (_, e) when Coefficient.is_nul e -> one
+          | (_, e) when is_nul e -> one
           | (v, _) when is_one v -> one
-          | (v, e) when Coefficient.is_one e -> v
-          | (v, e) -> mul (loop_pow (v, Coefficient.sub e Coefficient.one) v)
-          | _ -> raise (PowerError "Failure in Complex.pow : no match found!\n")
+          | (v, e) when Coefficient.is_one e.re -> v
+          | (v, e) -> mul (loop_pow (v, create (Coefficient.sub e.re Coefficient.one) Coefficient.zero)) v
         in
         loop_pow pair
 
     end
-
-module FloatParamComplex : (COEFFICIENTS with type t := Params.FloatParam.t) = MakeComplex(Params.FloatParam)
-
-
-
+  
+module FloatParamComplex : (COMPLEX with type t_in := Params.FloatParam.t) = MakeComplex(Params.FloatParam)
   

@@ -4,8 +4,8 @@ let process_line (input:string) =
     let lexbuf = Lexer.set_filename "stdin" (Lexing.from_string input) in
     try
         let (parsing_output:External_types.parser_t) = Parser.parse_input Lexer.read lexbuf in match parsing_output with
-            | Expr e ->
-                Printf.printf "%s\n" (Solver.expr_to_string (Solver.eval_expr e))
+            | Expr e -> print_endline (Solver.ast_to_string e) ;
+                Printf.printf "%s\n" (Solver.res_to_string (Solver.eval_expr e))
             | Equation (var, e) ->
                 Variable.set_variable var e ;
                 Printf.printf "%s\n" (Variable.to_string var)
@@ -13,7 +13,7 @@ let process_line (input:string) =
     with
     | Lexer.TokenError msg -> Printf.printf "Error : %s\n" msg
     | Parser.Error -> Printf.printf "Error : %s -> syntax error in parsing\n" (Lexer.position lexbuf)
-    | Complex.PowerError msg -> Printf.printf "Error : %s\n" msg
+    | Complex.FloatParamComplex.PowerError msg -> Printf.printf "Error : %s\n" msg
     | Variable.VariableNotFoundError msg -> Printf.printf "Error : %s\n" msg
    
 let main () =
