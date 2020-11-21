@@ -5,6 +5,7 @@ exception ResultError of string
 type expr =
   | Literal_float of float
   | Literal_complex of Complex.FloatParamComplex.t
+  | Var of string
   | Plus of expr * expr
   | Minus of expr * expr
   | Times of expr * expr
@@ -24,9 +25,9 @@ let rec eval_expr (e:expr) = match e with
                        let b = Params.FloatParam.create_var 0. "" 0. in
                        Complex.FloatParamComplex.create a b
   | Literal_complex c -> c
-  (* | Var x -> let a = Params.FloatParam.create_var 1. x 1. in
+  | Var x -> let a = Params.FloatParam.create_var 1. x 1. in
              let b = Params.FloatParam.create_var 0. "" 0. in
-             Complex.FloatParamComplex.create a b *)
+             Complex.FloatParamComplex.create a b
   | Plus(e1, e2) -> Complex.FloatParamComplex.add (eval_expr e1) (eval_expr e2)
   | Minus(e1, e2) -> Complex.FloatParamComplex.sub (eval_expr e1) (eval_expr e2)
   | Times(e1, e2) -> Complex.FloatParamComplex.mul (eval_expr e1) (eval_expr e2)
@@ -36,6 +37,7 @@ let rec eval_expr (e:expr) = match e with
 let rec ast_to_string (e:expr) = match e with
   | Literal_float n -> Printf.sprintf "%F" n
   | Literal_complex c -> Printf.sprintf "(%s)" (Complex.FloatParamComplex.to_string c)
+  | Var x -> Printf.sprintf "%s" x
   | Plus(e1, e2) -> Printf.sprintf "(%s + %s) " (ast_to_string e1) (ast_to_string e2)
   | Minus(e1, e2) -> Printf.sprintf "(%s - %s) " (ast_to_string e1) (ast_to_string e2)
   | Times(e1, e2) -> Printf.sprintf "(%s * %s) " (ast_to_string e1) (ast_to_string e2)

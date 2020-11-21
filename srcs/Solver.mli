@@ -1,6 +1,7 @@
 type expr =
   | Literal_float of float
   | Literal_complex of Complex.FloatParamComplex.t
+  | Var of string
   | Plus of expr * expr
   | Minus of expr * expr
   | Times of expr * expr

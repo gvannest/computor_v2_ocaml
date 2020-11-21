@@ -81,8 +81,12 @@ module MakeParams : MAKEPARAMS =
 
       let mul x1 x2 =
         if x1.name = x2.name
-        then  create_var (Input.mul x1.coeff x2.coeff) x1.name (Input.add x1.power x2.power)
-        else raise (Failure "Error Params functor : mul ()")
+        then create_var (Input.mul x1.coeff x2.coeff) x1.name (Input.add x1.power x2.power)
+        else if x1.name = ""
+        then create_var (Input.mul x1.coeff x2.coeff) x2.name x2.power
+        else if x2.name = ""
+        then create_var (Input.mul x1.coeff x2.coeff) x1.name x1.power
+        else raise (Failure "Error Params functor : only function with 1 variable are authorized")
         
       let div x1 x2 =
         if Input.compare x2.coeff Input.zero <> 0 then begin

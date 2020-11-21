@@ -6,8 +6,8 @@ let to_string var:string =
   Solver.res_to_string (Hashtbl.find var_hashtbl var)
 
 let get_variable (x:string) = match Hashtbl.find_opt var_hashtbl x with
-  | Some v -> v
-  | None -> raise (VariableNotFoundError (Printf.sprintf "variable '%s' not found" x))
+  | Some v -> Solver.Literal_complex v
+  | None -> Solver.Var x
 
 let print_state () =
   print_endline "State of current variables :" ;

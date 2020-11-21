@@ -38,10 +38,12 @@ formula_expr:
     | f = CONST_FLOAT                           { Literal_float f }
     | LPAREN e = formula_expr RPAREN            { e }
     | i = COMPLEX                               { Literal_complex i }
-    | x = VAR                                   { Literal_complex (Variable.get_variable x) }
+    | x = VAR                                   { Variable.get_variable x }
     | e1=formula_expr PLUS e2=formula_expr      { Plus (e1, e2) }
     | e1=formula_expr MINUS e2=formula_expr     { Minus (e1, e2) }
     | e1=formula_expr TIMES e2=formula_expr     { Times (e1, e2) }
     | e1=formula_expr DIV e2=formula_expr       { Div (e1, e2) }
     | e1=formula_expr POWER e2=formula_expr     { Power (e1, e2) }
     | MINUS e1=formula_expr %prec UMINUS        { Minus(Literal_float 0.0, e1) }
+
+    
