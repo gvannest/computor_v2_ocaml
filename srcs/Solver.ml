@@ -4,7 +4,7 @@ exception ResultError of string
 
 type expr =
   | Literal_float of float
-  | Literal_complex of Complex.FloatParamComplex.t
+  | Literal_complex of Complex.ComplexFloat.t
   | Var of string
   | Plus of expr * expr
   | Minus of expr * expr
@@ -21,9 +21,7 @@ Functor qui ajoute eval_expr aux différents modules? *)
 
 
 let rec eval_expr (e:expr) = match e with
-  | Literal_float f -> let a = Params.FloatParam.create_var f "" 0. in
-                       let b = Params.FloatParam.create_var 0. "" 0. in
-                       Complex.FloatParamComplex.create a b
+  | Literal_float f -> Complex.ComplexFloat.create f 0.
   | Literal_complex c -> c
   | Var x -> let a = Params.FloatParam.create_var 1. x 1. in
              let b = Params.FloatParam.create_var 0. "" 0. in

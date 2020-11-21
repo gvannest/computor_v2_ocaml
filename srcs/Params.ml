@@ -8,7 +8,6 @@ module type COEFFPOWER = sig
   val div : t -> t -> t
   val pow : t -> t -> t
   val compare : t -> t -> int
-  val rem : t -> t -> t
   val neg : t -> t
   val zero : t
   val one : t
@@ -23,16 +22,14 @@ module type PARAMETRIZED = sig
   val zero : t
   val one : t
   val neg : t -> t
-  val is_nul : t -> bool
-  val is_one : t -> bool
-  val is_neg : t -> bool
-  val is_parametrized : t -> bool
   val to_string : t -> string
   val add : t -> t -> t
   val sub : t -> t -> t
   val mul : t -> t -> t
   val div : t -> t -> t
   val pow : t -> t -> t
+  (* val get_coeff : t -> t_in
+  val get_power : t -> t_in *)
 end
 
 module type MAKEPARAMS = 
@@ -46,19 +43,15 @@ module MakeParams : MAKEPARAMS =
       let ( =. ) (x:t_in) (y:t_in) = (Input.compare x y = 0)
       let create_var (coeff:t_in) (name:string) (power:t_in) = { coeff=coeff; name=name; power=power }
       let create_constant (coeff:t_in) = { coeff=coeff; name=""; power=Input.zero }
-      let neg x = create_var (Input.neg x.coeff) x.name x.power
       let zero = create_var (Input.zero) "" (Input.zero)
       let one = create_var (Input.one) "" (Input.zero)
+      let neg x = create_var (Input.neg x.coeff) x.name x.power
       let is_nul x = (x.coeff =. Input.zero)
       let is_neg x = (Input.compare x.coeff Input.zero < 0)
+      (* let get_coeff x = x.coeff
+      let get_power x = x.power *)
 
-      let is_one x = match x with
-        | {coeff; name; power} when power =. Input.zero && coeff =. Input.one -> true
-        | _ -> false
-
-      let is_parametrized x = match x with
-        | {coeff; name; power} when Input.compare power Input.zero <> 0 -> true
-        | _ -> false
+      let is_one x = (x.coeff =. Input.one && x.power =. Input.zero)
 
       let to_string (x:t) = match x with
         | {coeff; name; power} when coeff =. Input.zero -> "0"
@@ -89,7 +82,7 @@ module MakeParams : MAKEPARAMS =
         else raise (Failure "Error Params functor : only function with 1 variable are authorized")
         
       let div x1 x2 =
-        if Input.compare x2.coeff Input.zero <> 0 then begin
+        if not (x2.coeff =. 0) then begin
           if x1.name = x2.name
           then  create_var (Input.div x1.coeff x2.coeff) x1.name (Input.sub x1.power x2.power)
           else raise (Failure "Error Params functor : div ()")
@@ -98,14 +91,14 @@ module MakeParams : MAKEPARAMS =
           raise Division_by_zero
 
       let pow x1 x2 =  
-        if Input.compare x2.power Input.zero = 0
+        if x2.power =. Input.zero
         then create_var (Input.pow x1.coeff x2.coeff) x1.name (Input.mul x1.power x2.power)
         else raise (Failure "Error Params functor : pow ()")
 
 
     end
 
-module FloatParam : (PARAMETRIZED with type t_in := float) = MakeParams(Float) 
+module ParamCpx : (PARAMETRIZED with type t_in := Complex.ComplexFloat.t) = MakeParams(Complex.ComplexFloat)
 
 
 
