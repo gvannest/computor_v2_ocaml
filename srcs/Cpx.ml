@@ -7,6 +7,7 @@ module type COEFFICIENTS = sig
   val mul : t -> t -> t
   val div : t -> t -> t
   val pow : t -> t -> t
+  val rem : t -> t-> t
   val to_string : t -> string
   val compare : t -> t -> int
   val neg : t -> t
@@ -84,23 +85,27 @@ module MakeComplex : MAKECOMPLEX =
         List.fold_left add zero [m1; m2; m3; m4]
       
       let rec div c1 c2 =
-        if c2.im <> Coefficient.zero
-        then
+        if compare c2 zero = 0 then raise Division_by_zero
+        else if c2.im <> Coefficient.zero then
+        begin
           let c2_conj = get_conjugate c2 in
           let numerator = mul c1 c2_conj in
           let denominator = mul c2 c2_conj in
           div numerator denominator
+        end
         else
           create (Coefficient.div c1.re c2.re) (Coefficient.div c1.im c2.re)
       
       let pow (c:t) (exp:t) =
         let pair = (c, exp) in
         let rec loop_pow p = match p with
-          | (_, e) when is_complex e -> raise (PowerError "Failure in Complex.pow : power is not a float!\n")
+          | (_, e) when is_complex e || Coefficient.rem e.re Coefficient.one <> Coefficient.zero -> raise (PowerError "Failure in Complex.pow : power is not an integer!")
           | (v, _) when is_null v -> zero
           | (_, e) when is_null e -> one
           | (v, _) when is_one v -> one
           | (v, e) when is_one e -> v
+          | (v, e) when not (is_complex v) -> create_constant (Coefficient.pow v.re e.re)
+          | (v, e) when Coefficient.compare e.re Coefficient.zero < 0 -> div one (loop_pow (c,(neg e)))
           | (v, e) -> mul (loop_pow (v, create (Coefficient.sub e.re Coefficient.one) Coefficient.zero)) v
         in
         loop_pow pair
