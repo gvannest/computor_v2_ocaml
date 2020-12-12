@@ -1,4 +1,4 @@
-(* Functor which will parametrized (ie introduced varibales) in the float module *)
+(* Functor which will parametrized (ie introduced varibales) in the float or complex modules *)
 
 module type COEFFPOWER = sig
   type t
@@ -19,6 +19,7 @@ module type PARAMETRIZED = sig
   type t
   val create_var : t_in -> string -> t_in -> t
   val create_constant : t_in -> t
+  val create_standard_var : string -> t
   val zero : t
   val one : t
   val neg : t -> t
@@ -42,12 +43,12 @@ module MakeParams : MAKEPARAMS =
       type t = { coeff: t_in; name: string; power: t_in }
       let ( =. ) (x:t_in) (y:t_in) = (Input.compare x y = 0)
       let create_var (coeff:t_in) (name:string) (power:t_in) = { coeff=coeff; name=name; power=power }
+      let create_standard_var (name:string) = { coeff=Input.one; name=name; power=Input.one }
       let create_constant (coeff:t_in) = { coeff=coeff; name=""; power=Input.zero }
       let zero = create_var (Input.zero) "" (Input.zero)
       let one = create_var (Input.one) "" (Input.zero)
       let neg x = create_var (Input.neg x.coeff) x.name x.power
       let is_nul x = (x.coeff =. Input.zero)
-      let is_neg x = (Input.compare x.coeff Input.zero < 0)
       (* let get_coeff x = x.coeff
       let get_power x = x.power *)
 
@@ -65,7 +66,9 @@ module MakeParams : MAKEPARAMS =
       let add x1 x2 =
         if x1.name = x2.name && (x1.power =. x2.power)
         then create_var (Input.add x1.coeff x2.coeff) x1.name x1.power
-        else raise (Failure "Error Params functor : add ()")
+        else begin
+          
+        end
 
       let sub x1 x2 =
         if x1.name = x2.name && (x1.power =. x2.power)
@@ -82,7 +85,7 @@ module MakeParams : MAKEPARAMS =
         else raise (Failure "Error Params functor : only function with 1 variable are authorized")
         
       let div x1 x2 =
-        if not (x2.coeff =. 0) then begin
+        if not (x2.coeff =. Input.zero) then begin
           if x1.name = x2.name
           then  create_var (Input.div x1.coeff x2.coeff) x1.name (Input.sub x1.power x2.power)
           else raise (Failure "Error Params functor : div ()")
@@ -98,7 +101,7 @@ module MakeParams : MAKEPARAMS =
 
     end
 
-module ParamCpx : (PARAMETRIZED with type t_in := Complex.ComplexFloat.t) = MakeParams(Complex.ComplexFloat)
+module VariableWithComplex : (PARAMETRIZED with type t_in := Cpx.ComplexWithFloats.t) = MakeParams(Cpx.ComplexWithFloats)
 
 
 

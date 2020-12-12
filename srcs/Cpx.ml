@@ -19,6 +19,8 @@ module type COMPLEX = sig
   type t
   exception PowerError of string
   val create : t_in -> t_in -> t
+  val create_constant : t_in -> t
+  val compare : t -> t -> int
   val neg : t -> t
   val zero : t
   val one : t
@@ -43,23 +45,28 @@ module MakeComplex : MAKECOMPLEX =
       exception PowerError of string
       
       let create (a:t_in) (b:t_in) = { re=a; im=b }
+      let create_constant (a:t_in) = { re=a; im=Coefficient.zero }
       let zero = create Coefficient.zero Coefficient.zero
       let one = create Coefficient.one Coefficient.zero
       let i = create Coefficient.zero Coefficient.one
       let neg c = create (Coefficient.neg c.re) (Coefficient.neg c.im)
       let is_coeff_null coeff = (Coefficient.compare coeff Coefficient.zero = 0) 
-      let is_neg_coeff coeff = (Coefficient.compare coeff Coefficient.zero < 0) 
-      let is_complex c = not (is _coeff_nul c.im)
+      let is_coeff_neg coeff = (Coefficient.compare coeff Coefficient.zero < 0) 
+      let is_complex c = not (is_coeff_null c.im)
       let is_null c = (is_coeff_null c.re && is_coeff_null c.im)
       let is_one c = (Coefficient.compare c.re Coefficient.one = 0) && (is_coeff_null c.im)
+
+      let compare c1 c2 = match (c1, c2) with
+        | (a, b) when (Coefficient.compare a.re b.re = 0) && (Coefficient.compare a.im b.im = 0) -> 0
+        | _ -> 1
 
       (* let is_real c = not (is_coeff_null c.re) && (is _coeff_nul c.im) 
       let is_im c = (is_coeff_null c.re) && (is_complex c) *)
 
       let to_string complex = match (complex.re, complex.im) with
-        | (a,b) when is_coeff_nul a && is_coeff_nul b -> "0"
-        | (a,b) when is_coeff_nul a -> Printf.sprintf "%si" (Coefficient.to_string b)
-        | (a,b) when is_coeff_nul b -> Printf.sprintf "%s" (Coefficient.to_string a)
+        | (a,b) when is_coeff_null a && is_coeff_null b -> "0"
+        | (a,b) when is_coeff_null a -> Printf.sprintf "%si" (Coefficient.to_string b)
+        | (a,b) when is_coeff_null b -> Printf.sprintf "%s" (Coefficient.to_string a)
         | (a,b) when is_coeff_neg b -> Printf.sprintf "%s - %si" (Coefficient.to_string a) (Coefficient.to_string (Coefficient.neg b))
         | _ -> Printf.sprintf "%s + %si" (Coefficient.to_string complex.re) (Coefficient.to_string complex.im)
       
@@ -90,8 +97,8 @@ module MakeComplex : MAKECOMPLEX =
         let pair = (c, exp) in
         let rec loop_pow p = match p with
           | (_, e) when is_complex e -> raise (PowerError "Failure in Complex.pow : power is not a float!\n")
-          | (v, _) when is_nul v -> zero
-          | (_, e) when is_nul e -> one
+          | (v, _) when is_null v -> zero
+          | (_, e) when is_null e -> one
           | (v, _) when is_one v -> one
           | (v, e) when is_one e -> v
           | (v, e) -> mul (loop_pow (v, create (Coefficient.sub e.re Coefficient.one) Coefficient.zero)) v
@@ -100,5 +107,5 @@ module MakeComplex : MAKECOMPLEX =
 
     end
   
-module ComplexFloat : (COMPLEX with type t_in := float) = MakeComplex(Float)
+module ComplexWithFloats : (COMPLEX with type t_in := float) = MakeComplex(Float)
   

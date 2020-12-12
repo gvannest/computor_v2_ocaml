@@ -13,7 +13,7 @@ let process_line (input:string) =
     with
     | Lexer.TokenError msg -> Printf.printf "Error : %s\n" msg
     | Parser.Error -> Printf.printf "Error : %s -> syntax error in parsing\n" (Lexer.position lexbuf)
-    | Complex.FloatParamComplex.PowerError msg -> Printf.printf "Error : %s\n" msg
+    | Cpx.ComplexWithFloats.PowerError msg -> Printf.printf "Error : %s\n" msg
     | Variable.VariableNotFoundError msg -> Printf.printf "Error : %s\n" msg
    
 let main () =

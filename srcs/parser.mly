@@ -4,7 +4,7 @@
 
 
 %token <float> CONST_FLOAT
-%token <Complex.FloatParamComplex.t> COMPLEX
+%token <Cpx.ComplexWithFloats.t> COMPLEX
 %token <string> VAR
 %token PLUS MINUS TIMES DIV POWER
 %token LPAREN RPAREN
