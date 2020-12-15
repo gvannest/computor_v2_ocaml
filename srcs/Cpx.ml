@@ -26,6 +26,7 @@ module type COMPLEX = sig
   val zero : t
   val one : t
   val i : t
+  val is_int : t -> bool
   val to_string : t -> string
   val add : t -> t -> t
   val sub : t -> t -> t
@@ -54,11 +55,13 @@ module MakeComplex : MAKECOMPLEX =
       let is_coeff_null coeff = (Coefficient.compare coeff Coefficient.zero = 0) 
       let is_coeff_neg coeff = (Coefficient.compare coeff Coefficient.zero < 0) 
       let is_complex c = not (is_coeff_null c.im)
+      let is_int c = ((is_coeff_null c.im) && (Coefficient.rem c.re Coefficient.one = Coefficient.zero))
       let is_null c = (is_coeff_null c.re && is_coeff_null c.im)
       let is_one c = (Coefficient.compare c.re Coefficient.one = 0) && (is_coeff_null c.im)
 
       let compare c1 c2 = match (c1, c2) with
-        | (a, b) when (Coefficient.compare a.re b.re = 0) && (Coefficient.compare a.im b.im = 0) -> 0
+      | (a, b) when (Coefficient.compare a.re b.re = 0) && (Coefficient.compare a.im b.im = 0) -> 0
+      | (a, b) when (Coefficient.compare a.re b.re < 0) && (Coefficient.compare a.im b.im = 0) -> -1
         | _ -> 1
 
       (* let is_real c = not (is_coeff_null c.re) && (is _coeff_nul c.im) 
@@ -99,13 +102,13 @@ module MakeComplex : MAKECOMPLEX =
       let pow (c:t) (exp:t) =
         let pair = (c, exp) in
         let rec loop_pow p = match p with
-          | (_, e) when is_complex e || Coefficient.rem e.re Coefficient.one <> Coefficient.zero -> raise (PowerError "Failure in Complex.pow : power is not an integer!")
           | (v, _) when is_null v -> zero
           | (_, e) when is_null e -> one
           | (v, _) when is_one v -> one
           | (v, e) when is_one e -> v
+          | (_, e) when is_complex e || Coefficient.rem e.re Coefficient.one <> Coefficient.zero -> raise (PowerError "Failure in Complex.pow : power is not an integer!")
           | (v, e) when not (is_complex v) -> create_constant (Coefficient.pow v.re e.re)
-          | (v, e) when Coefficient.compare e.re Coefficient.zero < 0 -> div one (loop_pow (c,(neg e)))
+          | (v, e) when Coefficient.compare e.re Coefficient.zero < 0 -> div one (loop_pow (v,(neg e)))
           | (v, e) -> mul (loop_pow (v, create (Coefficient.sub e.re Coefficient.one) Coefficient.zero)) v
         in
         loop_pow pair

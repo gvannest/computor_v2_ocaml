@@ -21,6 +21,7 @@ export OUNIT_CI=true
 OCB_FLAGS = -use-ocamlfind -I srcs -I tests
 OCB_MENHIR_FLAGS = -use-menhir
 OCB = ocamlbuild $(OCB_MENHIR_FLAGS) $(OCB_FLAGS)
+DEBUG = -tag debug
 
 all: native #byte
 
@@ -34,7 +35,7 @@ byte: sanity
 	$(OCB) $(NAME).byte
 
 test: sanity
-	$(OCB) $(NAME_TESTS).byte
+	$(OCB) $(DEBUG) $(NAME_TESTS).byte
 	./$(NAME_TESTS).byte -ci true
 
 # check that packages can be found
